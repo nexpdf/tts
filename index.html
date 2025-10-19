@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indian Accent Text-to-Speech</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-section label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        #text-input {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+            font-family: inherit;
+        }
+
+        #text-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .voice-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        select, input[type="range"] {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        input[type="range"] {
+            padding: 0;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            align-content: start;
+        }
+
+        .btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .status {
+            margin-top: 30px;
+        }
+
+        .status-message {
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        .status-speaking { 
+            background: #d4edda; 
+            color: #155724; 
+            border-left: 4px solid #28a745; 
+        }
+        .status-error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border-left: 4px solid #dc3545; 
+        }
+        .status-warning { 
+            background: #fff3cd; 
+            color: #856404; 
+            border-left: 4px solid #ffc107; 
+        }
+        .status-success { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border-left: 4px solid #17a2b8; 
+        }
+        .status-info { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border-left: 4px solid #17a2b8; 
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .features {
+            padding: 40px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .features h3 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 1.8em;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h4 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎤 Indian Accent Text-to-Speech</h1>
+            <p>Convert your text to natural-sounding Indian accent speech</p>
+        </header>
+
+        <div class="main-content">
+            <div class="input-section">
+                <label for="text-input">Enter your text:</label>
+                <textarea 
+                    id="text-input" 
+                    placeholder="Type your text here... Example: Namaste! Welcome to Indian TTS service."
+                    rows="8"
+                ></textarea>
+            </div>
+
+            <div class="controls">
+                <div class="voice-controls">
+                    <div class="control-group">
+                        <label for="voice-select">Select Voice:</label>
+                        <select id="voice-select">
+                            <option value="">Default Voice</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="rate">Speed: <span id="rate-value">1.0</span></label>
+                        <input type="range" id="rate" min="0.5" max="2" step="0.1" value="1.0">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="pitch">Pitch: <span id="pitch-value">1.0</span></label>
+                        <input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1.0">
+                    </div>
+
+                    <div class="control-group">
+                        <label for="volume">Volume: <span id="volume-value">1.0</span></label>
+                        <input type="range" id="volume" min="0" max="1" step="0.1" value="1.0">
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="speak-btn" class="btn btn-primary">
+                        🎤 Speak Now
+                    </button>
+                    <button id="stop-btn" class="btn btn-secondary">
+                        ⏹️ Stop
+                    </button>
+                    <button id="download-btn" class="btn btn-success" disabled>
+                        💾 Download Audio
+                    </button>
+                    <button id="clear-btn" class="btn btn-warning">
+                        🗑️ Clear Text
+                    </button>
+                </div>
+            </div>
+
+            <div class="status">
+                <div id="status-message" class="status-message">
+                    Ready to convert text to speech
+                </div>
+                <div class="progress-bar">
+                    <div id="progress" class="progress"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <h3>Features:</h3>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h4>Indian Accent</h4>
+                    <p>Natural sounding Indian English accent</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h4>Real-time</h4>
+                    <p>Instant text to speech conversion</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎚️</div>
+                    <h4>Customizable</h4>
+                    <p>Adjust speed, pitch, and volume</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔊</div>
+                    <h4>High Quality</h4>
+                    <p>Clear and natural voice output</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class IndianTTS {
+            constructor() {
+                this.synthesis = window.speechSynthesis;
+                this.utterance = null;
+                this.isSpeaking = false;
+                this.audioChunks = [];
+                this.mediaRecorder = null;
+                
+                this.initializeElements();
+                this.loadVoices();
+                this.setupEventListeners();
+                
+                // Load voices when they become available
+                speechSynthesis.onvoiceschanged = () => this.loadVoices();
+            }
+
+            initializeElements() {
+                this.textInput = document.getElementById('text-input');
+                this.voiceSelect = document.getElementById('voice-select');
+                this.rateSlider = document.getElementById('rate');
+                this.pitchSlider = document.getElementById('pitch');
+                this.volumeSlider = document.getElementById('volume');
+                this.rateValue = document.getElementById('rate-value');
+                this.pitchValue = document.getElementById('pitch-value');
+                this.volumeValue = document.getElementById('volume-value');
+                this.speakBtn = document.getElementById('speak-btn');
+                this.stopBtn = document.getElementById('stop-btn');
+                this.downloadBtn = document.getElementById('download-btn');
+                this.clearBtn = document.getElementById('clear-btn');
+                this.statusMessage = document.getElementById('status-message');
+                this.progressBar = document.getElementById('progress');
+            }
+
+            loadVoices() {
+                const voices = this.synthesis.getVoices();
+                this.voiceSelect.innerHTML = '<option value="">Default Voice</option>';
+                
+                // Filter for Indian English voices or similar
+                const indianVoices = voices.filter(voice => 
+                    voice.lang.includes('en-IN') || 
+                    voice.name.toLowerCase().includes('india') ||
+                    voice.name.toLowerCase().includes('hindi') ||
+                    voice.lang.includes('hi-')
+                );
+
+                const otherVoices = voices.filter(voice => 
+                    !indianVoices.includes(voice)
+                );
+
+                // Add Indian voices first
+                indianVoices.forEach(voice => {
+                    const option = document.createElement('option');
+                    option.value = voice.name;
+                    option.textContent = `${voice.name} (${voice.lang}) - Indian`;
+                    this.voiceSelect.appendChild(option);
+                });
+
+                // Add other English voices
+                otherVoices.forEach(voice => {
+                    if (voice.lang.includes('en-')) {
+                        const option = document.createElement('option');
+                        option.value = voice.name;
+                        option.textContent = `${voice.name} (${voice.lang})`;
+                        this.voiceSelect.appendChild(option);
+                    }
+                });
+
+                // Select first Indian voice by default
+                if (indianVoices.length > 0) {
+                    this.voiceSelect.value = indianVoices[0].name;
+                }
+            }
+
+            setupEventListeners() {
+                this.speakBtn.addEventListener('click', () => this.speak());
+                this.stopBtn.addEventListener('click', () => this.stop());
+                this.clearBtn.addEventListener('click', () => this.clearText());
+                this.downloadBtn.addEventListener('click', () => this.downloadAudio());
+
+                this.rateSlider.addEventListener('input', (e) => {
+                    this.rateValue.textContent = e.target.value;
+                });
+
+                this.pitchSlider.addEventListener('input', (e) => {
+                    this.pitchValue.textContent = e.target.value;
+                });
+
+                this.volumeSlider.addEventListener('input', (e) => {
+                    this.volumeValue.textContent = e.target.value;
+                });
+
+                // Enable download button when text is entered
+                this.textInput.addEventListener('input', () => {
+                    this.downloadBtn.disabled = !this.textInput.value.trim();
+                });
+            }
+
+            speak() {
+                const text = this.textInput.value.trim();
+                
+                if (!text) {
+                    this.updateStatus('Please enter some text to speak', 'error');
+                    return;
+                }
+
+                if (this.isSpeaking) {
+                    this.stop();
+                    return;
+                }
+
+                this.stop(); // Stop any current speech
+
+                this.utterance = new SpeechSynthesisUtterance(text);
+                
+                // Set voice
+                const selectedVoice = this.synthesis.getVoices().find(
+                    voice => voice.name === this.voiceSelect.value
+                );
+                if (selectedVoice) {
+                    this.utterance.voice = selectedVoice;
+                }
+
+                // Set properties
+                this.utterance.rate = parseFloat(this.rateSlider.value);
+                this.utterance.pitch = parseFloat(this.pitchSlider.value);
+                this.utterance.volume = parseFloat(this.volumeSlider.value);
+
+                // Event listeners for the utterance
+                this.utterance.onstart = () => {
+                    this.isSpeaking = true;
+                    this.speakBtn.innerHTML = '⏸️ Pause';
+                    this.updateStatus('Speaking...', 'speaking');
+                    this.startProgressAnimation();
+                };
+
+                this.utterance.onend = () => {
+                    this.isSpeaking = false;
+                    this.speakBtn.innerHTML = '🎤 Speak Now';
+                    this.updateStatus('Speech completed', 'success');
+                    this.stopProgressAnimation();
+                };
+
+                this.utterance.onerror = (event) => {
+                    this.isSpeaking = false;
+                    this.speakBtn.innerHTML = '🎤 Speak Now';
+                    this.updateStatus(`Error: ${event.error}`, 'error');
+                    this.stopProgressAnimation();
+                };
+
+                this.utterance.onpause = () => {
+                    this.speakBtn.innerHTML = '▶️ Resume';
+                    this.updateStatus('Speech paused', 'warning');
+                };
+
+                this.utterance.onresume = () => {
+                    this.speakBtn.innerHTML = '⏸️ Pause';
+                    this.updateStatus('Speaking...', 'speaking');
+                };
+
+                // Start speaking
+                this.synthesis.speak(this.utterance);
+            }
+
+            stop() {
+                if (this.synthesis.speaking) {
+                    this.synthesis.cancel();
+                    this.isSpeaking = false;
+                    this.speakBtn.innerHTML = '🎤 Speak Now';
+                    this.updateStatus('Speech stopped', 'warning');
+                    this.stopProgressAnimation();
+                }
+            }
+
+            clearText() {
+                this.textInput.value = '';
+                this.downloadBtn.disabled = true;
+                this.updateStatus('Text cleared', 'info');
+            }
+
+            downloadAudio() {
+                const text = this.textInput.value.trim();
+                if (!text) {
+                    this.updateStatus('No text to download', 'error');
+                    return;
+                }
+
+                this.updateStatus('Preparing download...', 'info');
+                
+                // Note: Web Speech API doesn't directly support audio download
+                // This is a workaround using the speech synthesis
+                alert('Audio download feature would require server-side processing. For now, you can use the speak feature.');
+                
+                // In a real implementation, you would send the text to a server
+                // that converts it to speech and returns an audio file
+            }
+
+            updateStatus(message, type) {
+                this.statusMessage.textContent = message;
+                this.statusMessage.className = `status-message status-${type}`;
+            }
+
+            startProgressAnimation() {
+                this.progressBar.style.width = '100%';
+                this.progressBar.style.transition = 'width 30s linear';
+            }
+
+            stopProgressAnimation() {
+                this.progressBar.style.width = '0%';
+                this.progressBar.style.transition = 'width 0.3s ease';
+            }
+        }
+
+        // Initialize the TTS application when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new IndianTTS();
+        });
+    </script>
+</body>
+</html>
